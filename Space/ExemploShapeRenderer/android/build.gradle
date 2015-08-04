@@ -1,6 +1,6 @@
 android {
     buildToolsVersion "22.0.1"
-    compileSdkVersion 22
+    compileSdkVersion 21
     sourceSets {
         main {
             manifest.srcFile 'AndroidManifest.xml'
@@ -59,7 +59,7 @@ task run(type: Exec) {
     }
 
     def adb = path + "/platform-tools/adb"
-    commandLine "$adb", 'shell', 'am', 'start', '-n', 'com.mygdx.game.android/com.mygdx.game.android.AndroidLauncher'
+    commandLine "$adb", 'shell', 'am', 'start', '-n', 'br.grupointegrado.ads.exemploShapeRenderer.android/br.grupointegrado.ads.exemploShapeRenderer.android.AndroidLauncher'
 }
 
 // sets up the Android Eclipse project, using the old Ant based build.
