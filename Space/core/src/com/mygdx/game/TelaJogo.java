@@ -1,12 +1,17 @@
 package com.mygdx.game;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
 import com.badlogic.gdx.utils.viewport.FillViewport;
 import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.TelaBase;
@@ -26,6 +31,12 @@ public class TelaJogo extends TelaBase {
     private Stage palco;
     private BitmapFont fonte;
     private Label lbpontuacao;
+    private Image jogador;
+    private Texture texturajogador;
+    private Texture texturajogadorDireita;
+    private Texture texturajogadorEsquerda;
+    private boolean IndoDireita;
+    private boolean IndoEsquerda;
 
     /**
      * referenciando a tela base com o construtor
@@ -39,6 +50,8 @@ public class TelaJogo extends TelaBase {
      * chamado quando a tela é exibida
      */
     @Override
+
+
     public void show() {
 
         camera = new OrthographicCamera(Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
@@ -47,6 +60,24 @@ public class TelaJogo extends TelaBase {
 
         initFonte();
         initInformacoes();
+        initJogador();
+
+    }
+
+    private void initJogador(){
+        texturajogador = new Texture("sprites/player.png");
+        texturajogadorDireita = new Texture("sprites/player-right.png");
+        texturajogadorEsquerda = new Texture("sprites/player-left.png");
+
+        jogador = new Image(texturajogador);
+
+        float x =camera.viewportWidth/2- jogador.getWidth()/2;
+        float y = 15;
+        jogador.setPosition(x,y);
+        palco.addActor(jogador);
+
+
+
 
     }
 
@@ -77,10 +108,67 @@ public class TelaJogo extends TelaBase {
 
         lbpontuacao.setPosition(10,camera.viewportHeight -20);
 
+        CapituraTeclas();
+        atualizaJogador(delta);
+
+
         palco.act(delta);
         palco.draw();
 
 
+
+
+    }
+
+    private void atualizaJogador(float delta) {
+        //atualiza a osiçaõ do jogador a velocidade determinada
+      float velocidade = 500;
+        if(IndoDireita){
+            if (jogador.getX() < camera.viewportWidth - jogador.getImageWidth()) {
+
+
+                float x = jogador.getX() + velocidade * delta;
+                float y = jogador.getY();
+                jogador.setPosition(x, y);
+            }
+        }
+
+        if(IndoEsquerda){
+            if(jogador.getX() > 0) {
+                float x = jogador.getX() - velocidade * delta;
+                float y = jogador.getY();
+                jogador.setPosition(x, y);
+
+            }
+        }
+
+        if (IndoDireita){
+            //trocar imagem direita
+            jogador.setDrawable(new SpriteDrawable(new Sprite(texturajogadorDireita)));
+        }else if(IndoEsquerda){
+            //trocar imagem direita
+            jogador.setDrawable(new SpriteDrawable(new Sprite(texturajogadorEsquerda)));
+        }else{
+            //trocar imagem centro
+            jogador.setDrawable(new SpriteDrawable(new Sprite(texturajogador)));
+
+        }
+
+    }
+
+    private void CapituraTeclas() {
+        IndoDireita = false;
+        IndoEsquerda = false;
+      //verifica tecla esquerda
+        if(Gdx.input.isKeyPressed(Input.Keys.LEFT)){
+            IndoEsquerda= true;
+
+        }
+//verifica tecla direita
+        if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
+            IndoDireita= true;
+
+        }
     }
 
     /**
@@ -120,5 +208,8 @@ public class TelaJogo extends TelaBase {
         batch.dispose();
         palco.dispose();
         fonte.dispose();
+        texturajogadorDireita.dispose();;
+        texturajogadorEsquerda.dispose();;
+        texturajogador.dispose();
     }
 }
