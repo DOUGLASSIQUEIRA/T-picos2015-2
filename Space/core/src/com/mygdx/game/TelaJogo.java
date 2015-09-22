@@ -2,6 +2,7 @@ package com.mygdx.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
@@ -15,6 +16,7 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeType;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
@@ -24,6 +26,7 @@ import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.TelaBase;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 
+import javafx.application.Application;
 
 
 /**
@@ -191,7 +194,8 @@ if (gameOver == false) {
     detectarColisoes(meteoros2, 15);
 }else {
    if (musicaFundo.isPlaying())
-       musicaFundo.stop();;
+       musicaFundo.stop();
+    reiniciarJogo();
 }
 
         //atualiza situação do palco
@@ -203,6 +207,18 @@ if (gameOver == false) {
         PalcoInformacoes.draw();
 
 
+    }
+
+    private void reiniciarJogo() {
+        if (Gdx.input.isKeyJustPressed((Input.Keys.ENTER))){
+            Preferences preferencias = Gdx.app.getPreferences("SpaceInvaders");
+            int pontuacaoMaxima = preferencias.getInteger("pontuacao_maxima",0);
+            if (pontuacao > pontuacaoMaxima){
+                preferencias.putInteger("pontuacao_maxima",pontuacao);
+                preferencias.flush();
+            }
+            game.setScreen((new TelaMenu(game)));
+        }
     }
 
     private void atualizarExplosoes(float delta) {
@@ -233,7 +249,7 @@ if (gameOver == false) {
                  recTiro.set(tiro.getX(), tiro.getY(), tiro.getWidth(), tiro.getHeight());
                 if (recMeteoro.overlaps(recTiro)){
                     //aqui ocorre uma colisão do tiro com o meteoro 1
-                    pontuacao = 5;
+                    pontuacao += valePonto;
                     tiro.remove();
                     tiros.removeValue(tiro, true);
                     meteoro.remove();//remove do palco
@@ -303,6 +319,7 @@ if (gameOver == false) {
             if (meteoro.getY() + meteoro.getHeight() < 0) {
                 meteoro.remove();//remove do palco
                 meteoros1.removeValue(meteoro, true); //remove da lista
+                pontuacao = pontuacao - 30;
             }
         }
 
@@ -316,6 +333,7 @@ if (gameOver == false) {
             if (meteoro.getY() + meteoro.getHeight() < 0) {
                 meteoro.remove();//remove do palco
                 meteoros2.removeValue(meteoro, true); //remove da lista
+                pontuacao = pontuacao - 60;
             }
         }
     }
@@ -407,20 +425,53 @@ if (gameOver == false) {
         atirando = false;
 
       //verifica tecla esquerda
-        if(Gdx.input.isKeyPressed(Input.Keys.LEFT)){
+        if(Gdx.input.isKeyPressed(Input.Keys.LEFT) || clicouEsquerda()){
             IndoEsquerda= true;
 
         }
 //verifica tecla direita
-        if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
+        if(Gdx.input.isKeyPressed(Input.Keys.RIGHT) || clicouDireita()){
             IndoDireita= true;
 
         }
-        if(Gdx.input.isKeyPressed(Input.Keys.SPACE)){
+        if(Gdx.input.isKeyPressed(Input.Keys.SPACE)|| Gdx.app.getType() == com.badlogic.gdx.Application.ApplicationType.Android){
            atirando = true;
 
         }
 
+    }
+
+    private boolean clicouEsquerda() {
+
+        if(Gdx.input.isTouched()) {
+            Vector3 posicao = new Vector3();
+            posicao.x = Gdx.input.getX();
+            posicao.y = Gdx.input.getY();
+
+            posicao = camera.unproject(posicao);
+            float meio = camera.viewportWidth / 2;
+
+            if (posicao.x < meio) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean clicouDireita() {
+        if(Gdx.input.isTouched()) {
+            Vector3 posicao = new Vector3();
+            posicao.x = Gdx.input.getX();
+            posicao.y = Gdx.input.getY();
+
+            posicao = camera.unproject(posicao);
+            float meio = camera.viewportWidth / 2;
+
+            if (posicao.x > meio) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
